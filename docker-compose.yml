@@ -1,0 +1,45 @@
+version: '3'
+services:
+  thrive_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: thrive_app_img
+    container_name: thrive_app
+    restart: always
+    ports:
+      - "8808:8000"
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    environment:
+        - DB_CONNECTION=mysql
+        - DB_HOST=thrive_db
+        - DB_PORT=3306
+        - DB_DATABASE=thrive_db
+        - DB_USERNAME=thrive_user
+        - DB_PASSWORD=123456
+    networks:
+      - thrive_app-network
+
+  thrive_db:
+    image: mysql:8.0
+    container_name: thrive_db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3808:3306"
+    environment:
+      TZ: UTC
+      MYSQL_DATABASE: thrive_db
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_USER: thrive_user
+      MYSQL_PASSWORD: 123456
+    volumes:
+      - ./src/thrive_mysql-data:/var/lib/mysql
+    networks:
+      - thrive_app-network
+
+networks:
+  thrive_app-network:
+    driver: bridge
