@@ -1,0 +1,1 @@
+<script src="{{ config('app.asset_function')('js/home.js') }}"></script>
