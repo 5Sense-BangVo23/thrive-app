@@ -117,18 +117,20 @@
     <h2 class="form-title">Add New Category</h2>
 
     @if ($errors->any())
-        <div class="form-error-message">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
+        @if(session('error'))
+            @include('admin.components.messages.alert-message', [
+                'type' => 'error',
+                'message' => session('error'),
+                'time' => session('error_time')
+            ])
+        @endif
     @endif
     @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
+        @include('admin.components.messages.alert-message', [
+            'type' => 'success',
+            'message' => session('success'),
+            'time' => session('success_time')
+        ])
     @endif
 
 

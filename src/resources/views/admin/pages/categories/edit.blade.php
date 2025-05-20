@@ -127,9 +127,11 @@
         </div>
     @endif
     @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
+        @include('admin.components.messages.alert-message', [
+            'type' => 'success',
+            'message' => session('success'),
+            'time' => session('success_time')
+        ])
     @endif
 
    <form action="{{ route('admin.categories.update', $category->id) }}" method="POST" id="edit-category-form">

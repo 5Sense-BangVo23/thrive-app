@@ -16,12 +16,22 @@ class CategoryBuilder
 
     public function all(array $columns = ['*']): Collection
     {
+        if (empty($columns)) {
+            $columns = ['*'];
+        }
+
         return $this->query->select($columns)->get();
     }
 
     public function find(int $id, array $columns = ['*']): ?TblCategory
     {
         return $this->query->select($columns)->find($id);
+    }
+
+    public function where(string $field, $value): self
+    {
+        $this->query->where($field, $value);
+        return $this;
     }
 
     public function create(array $data): TblCategory
@@ -43,9 +53,6 @@ class CategoryBuilder
             $category->setPublishStatus($data['status']);
         }
 
-
-
-
         return $category->update($data);
     }
 
@@ -57,7 +64,7 @@ class CategoryBuilder
         }
         return $category->delete();
     }
-
+    
     public function whereName(string $name): self
     {
         if (str_starts_with($name, '%')) {
@@ -68,6 +75,27 @@ class CategoryBuilder
         }
         return $this;
     }
+
+    public function whereDescription(string $description): self
+    {
+        if (str_starts_with($description, '%')) {
+            $description = ltrim($description, '%');
+            $this->query->where('description', 'like', "{$description}%");
+        } else {
+            $this->query->where('description', 'like', "%{$description}%");
+        }
+        return $this;
+    }
+
+   public function whereStatus(string $status): self
+    {
+        $this->query->whereHas('published', function ($query) use ($status) {
+            $query->where('status', $status);
+        });
+        return $this;
+    }
+
+
 
     public function withProducts(): self
     {

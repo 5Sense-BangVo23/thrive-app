@@ -20,11 +20,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('create', [AdminCategoryController::class, 'store'])->name('store');
         
         Route::get('edit/{id}', [AdminCategoryController::class, 'edit'])->name('edit');
-        Route::put('{id}', [AdminCategoryController::class, 'update'])->name('update');
+        Route::put('/{id}', [AdminCategoryController::class, 'update'])->name('update');
 
         Route::get('detail/{id}', [AdminCategoryController::class, 'view'])->name('detail');
         Route::delete('delete/{id}', [AdminCategoryController::class, 'detroy'])->name('delete');
-
+        Route::post('visibility', [AdminCategoryController::class, 'updateVisibility'])->name('visibility');
+        Route::get('search', [AdminCategoryController::class, 'search'])->name('search');
+       
         // Optional redirect
         Route::get('list', fn () => redirect()->route('admin.categories'));
     });

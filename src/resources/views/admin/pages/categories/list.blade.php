@@ -81,45 +81,6 @@
         flex-wrap: wrap;
     }
 
-    .category-btn-edit,
-    .category-btn-delete,
-    .category-btn-detail {
-        padding: 6px 12px;
-        font-size: 13px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        text-decoration: none;
-        color: #fff;
-        white-space: nowrap;
-        display: inline-block;
-        transition: background-color 0.2s ease;
-    }
-
-    .category-btn-edit {
-        background-color: #f39c12;
-    }
-
-    .category-btn-edit:hover {
-        background-color: #e67e22;
-    }
-
-    .category-btn-delete {
-        background-color: #e91e63;
-    }
-
-    .category-btn-delete:hover {
-        background-color: #c2185b;
-    }
-
-    .category-btn-detail {
-        background-color: #03a9f4;
-    }
-
-    .category-btn-detail:hover {
-        background-color: #0288d1;
-    }
-
    .category-pagination {
         margin-top: 24px;
         text-align: center;
@@ -171,6 +132,39 @@
         cursor: not-allowed;
     }
 
+    .status-icon {
+        font-size: 1.3rem;
+        margin: 0 4px;
+        transition: transform 0.2s ease;
+        cursor: default;
+    }
+
+    .status-icon:hover {
+        transform: scale(1.2);
+    }
+
+    /* Specific colors for each status */
+    .status-draft {
+        color: #6c757d; /* Gray */
+    }
+
+    .status-published {
+        color: #28a745; /* Green */
+    }
+
+    .status-archived {
+        color: #6c757d; /* Dim Gray */
+    }
+
+    .status-unknown {
+        color: #ffc107; /* Yellow/Warning */
+    }
+
+    .published-status-header {
+        font-weight: 700;
+        text-transform: uppercase;
+        text-align: center;
+    }
 </style>
 
 
@@ -180,35 +174,116 @@
 <div class="category-admin-container">
     <h2 class="category-admin-title">Category List</h2>
 
+    @include('admin.layout.search', [
+            'route' => route('admin.categories.search'),
+            'cancelRoute' => route('admin.categories.list')
+    ])
+
+    @include('admin.layout.visibility-fields', [
+            'fields' => $fields,
+            'visibleFields' => $visibleFields,
+            'route' => route('admin.categories.visibility')
+    ])
+
     <a href="{{ route('admin.categories.create') }}" class="category-btn-add">+ Add New Category</a>
 
     @if(session('success'))
-        <div class="category-alert-success">{{ session('success') }}</div>
+        @include('admin.components.messages.alert-message', [
+            'type' => 'success',
+            'message' => session('success'),
+            'time' => session('success_time')
+        ])
     @endif
 
-    @include('admin.pages.categories.partials.category_table')
+    @if(empty($categories) || count($categories) == 0)
+      <div class="category-no-items">No categories available.</div>
+    @else
+      <table class="category-table">
+            <thead>
+                <tr>
+                    @if (in_array('id', $visibleFields))
+                        <th>#</th>
+                    @endif
+
+                    @if (in_array('name', $visibleFields))
+                        <th>Category Name</th>
+                    @endif
+
+                    @if (in_array('description', $visibleFields))
+                        <th>Description</th>
+                    @endif
+
+                   
+                   <th class="published-status-header">Published Status <i class="fas fa-star" style="color:#888;"></i></th>
+
+                    <th>Actions</th> {{-- Actions luôn hiện --}}
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($categories as $category)
+                    <tr>
+                        @if (in_array('id', $visibleFields))
+                            <td>{{ $category->id ?? '-' }}</td>
+                        @endif
+
+                        @if (in_array('name', $visibleFields))
+                            <td>{{ $category->name ?? '-' }}</td>
+                        @endif
+
+                        @if (in_array('description', $visibleFields))
+                            <td>{{ $category->description ?? '-' }}</td>
+                        @endif
+
+                        <td class="text-center">
+                        @php
+                            $status = $category->publish_status ?? 'unknown';
+                        @endphp
+
+                        @switch($status)
+                            @case('draft')
+                                <i class="fas fa-pencil-alt status-icon status-draft" title="Draft"></i>
+                                @break
+
+                            @case('published')
+                                <i class="fas fa-check-circle status-icon status-published" title="Published"></i>
+                                @break
+
+                            @case('archived')
+                                <i class="fas fa-archive status-icon status-archived" title="Archived"></i>
+                                @break
+
+                            @default
+                                <i class="fas fa-question-circle status-icon status-unknown" title="Unknown"></i>
+                        @endswitch
+                    </td>
+
+                        {{-- Actions --}}
+                        <td>
+                            <div class="category-action-buttons btn-group-dropdown " style="display:flex; gap:8px; align-items:center;">
+                                <button class="btn-edit dropdown-toggle" onclick="toggleDropdown(this)">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+
+                                <div class="dropdown-menu-custom">
+                                <a href="{{ route('admin.categories.edit', $category->id) }}" class="btn-edit">Edit</a>
+                                <form action="{{ route('admin.categories.delete', $category->id) }}" method="POST" onsubmit="return confirm('Are you sure to delete this category?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-delete">Delete</button>
+                                </form>
+                                <a href="{{ route('admin.categories.detail', $category->id) }}" class="btn-detail">View</a>
+                               </div>
+                                
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 
     <div class="category-pagination">
        {{ $categories->links('admin.components.pagination.custom') }}
     </div>
 </div>
 @endsection
-
-
- <a href="javascript:void(0);" onclick="loadCategories();" class="category-btn-add">↻ Reload Categories</a>
-<script>
-    function loadCategories() {
-        fetch("{{ route('admin.categories.list') }}", {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('category-table-container').innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error loading categories:', error);
-        });
-    }
-</script>
