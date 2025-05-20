@@ -112,8 +112,8 @@
         <h2 class="detail-title">{{ $category->name }}</h2>
 
        <div class="detail-meta">
-            <span class="status {{ $category->publish_status }}">
-                {{ ucfirst($category->publish_status) }}
+            <span class="status {{ strtolower($category->publish_status ?: 'unknown') }}">
+                {{ ucfirst($category->publish_status ?: 'unknown') }}
             </span>
 
 

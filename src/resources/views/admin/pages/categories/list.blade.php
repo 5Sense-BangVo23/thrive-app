@@ -213,10 +213,15 @@
                         <th>Description</th>
                     @endif
 
-                   
                    <th class="published-status-header">Published Status <i class="fas fa-star" style="color:#888;"></i></th>
 
-                    <th>Actions</th> {{-- Actions luôn hiện --}}
+                    @if (in_array('created_at', $visibleFields))
+                        <th>Created At</th>
+                    @endif
+                     @if (in_array('updated_at', $visibleFields))
+                        <th>Updated At</th>
+                    @endif
+                     <th>Actions</th> {{-- Actions luôn hiện --}}
                 </tr>
             </thead>
             <tbody>
@@ -235,27 +240,37 @@
                         @endif
 
                         <td class="text-center">
-                        @php
-                            $status = $category->publish_status ?? 'unknown';
-                        @endphp
+                            @php
+                                $status = $category->publish_status ?? 'unknown';
+                            @endphp
 
-                        @switch($status)
-                            @case('draft')
-                                <i class="fas fa-pencil-alt status-icon status-draft" title="Draft"></i>
-                                @break
+                            
 
-                            @case('published')
-                                <i class="fas fa-check-circle status-icon status-published" title="Published"></i>
-                                @break
+                            @switch($status)
+                                @case('draft')
+                                    <i class="fas fa-pencil-alt status-icon status-draft" title="Draft"></i>
+                                    @break
 
-                            @case('archived')
-                                <i class="fas fa-archive status-icon status-archived" title="Archived"></i>
-                                @break
+                                @case('published')
+                                    <i class="fas fa-check-circle status-icon status-published" title="Published"></i>
+                                    @break
 
-                            @default
-                                <i class="fas fa-question-circle status-icon status-unknown" title="Unknown"></i>
-                        @endswitch
-                    </td>
+                                @case('archived')
+                                    <i class="fas fa-archive status-icon status-archived" title="Archived"></i>
+                                    @break
+
+                                @default
+                                    <i class="fas fa-question-circle status-icon status-unknown" title="Unknown"></i>
+                            @endswitch
+                        </td>
+
+                        @if (in_array('created_at', $visibleFields))
+                            <td>{{ $category->created_at ? $category->created_at->format('d M Y') : '-' }}</td>
+                        @endif
+
+                        @if (in_array('updated_at', $visibleFields))
+                            <td>{{ $category->updated_at ? $category->updated_at->format('d M Y') : '-' }}</td>
+                        @endif
 
                         {{-- Actions --}}
                         <td>
